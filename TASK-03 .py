@@ -1,75 +1,61 @@
-####################### TASK 3: Pixel Manipulation for Image Encryption  #################
-import subprocess
 
-def install_package(package):
-    try:
-        subprocess.check_call(["python", '-m', 'pip', 'install', package])
-    except Exception as e:
-        print(f"Error installing {package}: {str(e)}")
+########################################  Task-03 ####################################
+##################################Password Complexity Checker##########################
+import re
+import tkinter as tk
+from tkinter import messagebox
 
-# Check if NumPy is installed
-try:
-    import numpy as np
-except ImportError:
-    print("NumPy library not found. Installing...")
-    install_package('numpy')
-    import numpy as np
+def password_strength(password):
+    length = len(password)
+    uppercase = bool(re.search(r'[A-Z]', password))
+    lowercase = bool(re.search(r'[a-z]', password))
+    numbers = bool(re.search(r'[0-9]', password))
+    special_characters = bool(re.search(r'[!@#$%^&*(),.?":{}|<>]', password))
+    
+    strength = 0
 
-# Check if Pillow is installed
-try:
-    from PIL import Image
-except ImportError:
-    print("Pillow library not found. Installing...")
-    install_package('Pillow')
-    from PIL import Image
+    # Length criteria
+    if length >= 8:
+        strength += 1
+    if length >= 12:
+        strength += 1
 
-def encrypt_image(image_path, key):
-    try:
-        img = Image.open(image_path)
-        img_array = np.array(img)
-        
-        # Perform XOR operation with the key
-        encrypted_array = img_array ^ key
-        
-        # Create encrypted image from the encrypted array
-        encrypted_img = Image.fromarray(encrypted_array)
-        
-        # Save encrypted image
-        encrypted_img.save("encrypted_image.png")
-        print("Image encrypted successfully.")
-    except Exception as e:
-        print("Error encrypting image:", str(e))
+    # Mix of uppercase and lowercase letters
+    if uppercase and lowercase:
+        strength += 1
 
-def decrypt_image(image_path, key):
-    try:
-        img = Image.open(image_path)
-        img_array = np.array(img)
-        
-        # Perform XOR operation with the key to decrypt
-        decrypted_array = img_array ^ key
-        
-        # Create decrypted image from the decrypted array
-        decrypted_img = Image.fromarray(decrypted_array)
-        
-        # Show decrypted image
-        decrypted_img.show()
-    except Exception as e:
-        print("Error decrypting image:", str(e))
+    # Presence of numbers and special characters
+    if numbers:
+        strength += 1
+    if special_characters:
+        strength += 1
 
-def main():
-    try:
-        image_path = input("Enter the path to the image: ")
-        key = int(input("Enter the encryption/decryption key: "))
-        option = input("Encrypt or Decrypt? (e/d): ")
+    return strength
 
-        if option == 'e':
-            encrypt_image(image_path, key)
-        elif option == 'd':
-            decrypt_image(image_path, key)
-        else:
-            print("Invalid option.")
-    except Exception as e:
-        print("Error:", str(e))
+def assess_password():
+    password = password_entry.get()
+    strength = password_strength(password)
+    
+    if strength <= 1:
+        messagebox.showinfo("Password Strength", "Password is weak.")
+    elif strength <= 3:
+        messagebox.showinfo("Password Strength", "Password is moderate.")
+    else:
+        messagebox.showinfo("Password Strength", "Password is strong.")
 
-if __name__ == "__main__":
-    main()
+# Create main window
+root = tk.Tk()
+root.title("Password Strength Checker")
+
+# Create password entry widget
+password_label = tk.Label(root, text="Enter your password:")
+password_label.pack()
+password_entry = tk.Entry(root, show="*")
+password_entry.pack()
+
+# Create assess button
+assess_button = tk.Button(root, text="Assess Password", command=assess_password)
+assess_button.pack()
+
+# Run the main event loop
+root.mainloop()
